@@ -1,4 +1,4 @@
-.input {
+.wubi-input-box {
   position: fixed;
   width: 100%;
   bottom: 0;
@@ -10,11 +10,11 @@
   color: #ffffff;
   background-color: #282828;
 }
-.input * {
+.wubi-input-box * {
   padding: 0;
   margin: 0;
 }
-.input > .key {
+.wubi-input-box > .wubi-input-key {
   width: 100%;
   font-size: 16px;
   line-height: 20px;
@@ -22,21 +22,21 @@
   white-space: nowrap;
   background-color: #333333;
 }
-.input > .text-ul {
+.wubi-input-box > .wubi-input-text-ul {
   white-space: nowrap;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
-.input > .text-ul::-webkit-scrollbar {
+.wubi-input-box > .wubi-input-text-ul::-webkit-scrollbar {
   display: none;
 }
-.input > .text-ul > .text-li {
+.wubi-input-box > .wubi-input-text-ul > .wubi-input-text-li {
   display: inline-block;
   color: #ffffff;
   font-size: 20px;
   line-height: 48px;
   padding: 0 10px;
 }
-.input > .text-ul > .text-li.active {
+.wubi-input-box > .wubi-input-text-ul > .wubi-input-text-li.active {
   color: #b6d0a9;
 }

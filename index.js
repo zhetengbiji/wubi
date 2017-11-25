@@ -66,6 +66,7 @@ function kewdown(event) {
                     break
                 }
                 default: {
+                    send(-1)
                     preventDefault = false
                     break
                 }
@@ -96,7 +97,7 @@ var key = document.getElementById('key')
 var ul = document.getElementById('ul')
 ul.addEventListener('click', function(event) {
     var target = event.target
-    if(!target.classList.contains('text-li')) {
+    if(!target.classList.contains('wubi-input-text-li')) {
         return
     }
     var index = target.getAttribute('data-index')
@@ -130,7 +131,7 @@ var show = {
         ul.innerHTML = ''
         texts.forEach((element, index) => {
             var li = document.createElement('div')
-            li.classList.add('text-li')
+            li.classList.add('wubi-input-text-li')
             li.setAttribute('data-index', index)
             li.innerText = element
             ul.appendChild(li)

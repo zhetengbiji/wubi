@@ -1,117 +1,167 @@
-var input
-document.addEventListener('touchend', updateInput)
-document.addEventListener('keydown', updateInput)
-// 获取文字
-function getText(text, successCallback, errorCallback) {
-    var xhr = new XMLHttpRequest()
-    xhr.open('GET', 'https://ssssss.link/inputtools/request?text=' + text + '&itc=zh-t-i0-wubi-1986&num=13&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage')
-    xhr.onreadystatechange = function() {
-        if(xhr.readyState === 4) {
-            if(xhr.status == 200) {
-                var res = xhr.responseText
-                var data
-                try {
-                    data = JSON.parse(res)
-                } catch(error) {
-                    console.error('error:', error)
-                    errorCallback && errorCallback(error)
-                }
-                console.log(data)
-                successCallback && successCallback(data)
-            } else {
-                console.error('error:', xhr.status)
-                errorCallback && errorCallback(xhr)
-            }
+function ready(callback) {
+    function completed() {
+        if(typeof callback === 'function') {
+            callback()
+            callback = null
         }
     }
-    xhr.send(null)
-}
-// 更新输入框
-function updateInput(event) {
-    var target = event.target
-    var tagName = target.tagName
-    // target === document.activeElement
-    if((tagName === 'INPUT' || tagName === 'TEXTAREA') && target !== input) {
-        console.log(target)
-        input && input.removeEventListener('keydown', kewdown, false)
-        input = target
-        // kewdown(event)
-        input.addEventListener('keydown', kewdown, false)
-    }
-}
-// 按下按键
-function kewdown(event) {
-    var preventDefault = true
-    console.log('kewdown:', event)
-    var keyCode = event.keyCode
-    var key = show.key
-    if(event.key.match(/^[a-z]$/)) {
-        show.key += event.key
+    if(document.readyState === "complete") {
+        completed()
     } else {
-        if(show.key) {
-            switch(keyCode) {
-                // 删除
-                case 8: {
-                    show.key = key.substr(0, key.length - 1)
-                    break
-                }
-                // 空格-选中默认
-                case 32: {
-                    send(0)
-                    break
-                }
-                // 回车-发送字符
-                case 13: {
-                    send(-1)
-                    break
-                }
-                default: {
-                    send(-1)
-                    preventDefault = false
-                    break
-                }
-            }
-        } else {
-            preventDefault = false
-        }
+        document.addEventListener("DOMContentLoaded", completed, false)
+        window.addEventListener("load", completed, false)
     }
+}
 
-    if(preventDefault) {
-        event.preventDefault()
+var KEYCODE = { '65': 'a', '66': 'b', '67': 'c', '68': 'd', '69': 'e', '70': 'f', '71': 'g', '72': 'h', '73': 'i', '74': 'j', '75': 'k', '76': 'l', '77': 'm', '78': 'n', '79': 'o', '80': 'p', '81': 'q', '82': 'r', '83': 's', '84': 't', '85': 'u', '86': 'v', '87': 'w', '88': 'x', '89': 'y', '90': 'z', }
+var KEYCODE_NUM = { '49': 1, '50': 2, '51': 3, '52': 4, '53': 5, '54': 6, '55': 7, '56': 8, '57': 9 }
+
+var inputs = {
+    list: [],
+    active: null,
+    add: function(target) {
+        this.list.push(target)
+        target.addEventListener('keydown', this.onkewdown, false)
+        target.addEventListener('blur', function() {
+            console.log(blur)
+            inputUI.key = ''
+        })
+    },
+    onkewdown: function(event) {
+        var preventDefault = true
+        console.log('onkewdown:', event)
+        var keyCode = event.keyCode
+        var key = inputUI.key
+        if(keyCode in KEYCODE) {
+            inputUI.key += KEYCODE[keyCode]
+        } else {
+            if(inputUI.key) {
+                if(keyCode in KEYCODE_NUM) {
+                    inputUI.send(KEYCODE_NUM[keyCode] - 1)
+                } else {
+                    switch(keyCode) {
+                        // 删除
+                        case 8: {
+                            inputUI.key = key.substr(0, key.length - 1)
+                            break
+                        }
+                        case 46: {
+                            inputUI.key = key.substr(0, key.length - 1)
+                            break
+                        }
+                        // 空格-选中默认
+                        case 32: {
+                            inputUI.send(0)
+                            break
+                        }
+                        // 回车-发送字符
+                        case 13: {
+                            inputUI.send(-1)
+                            break
+                        }
+                        // Alt
+                        case 18: {
+                            break
+                        }
+                        default: {
+                            inputUI.send(-1)
+                            preventDefault = false
+                            break
+                        }
+                    }
+                }
+            } else {
+                preventDefault = false
+            }
+        }
+
+        if(preventDefault) {
+            event.preventDefault()
+        }
+    },
+    find: function(target) {
+        var tagName = target.tagName
+        if((tagName === 'INPUT' || tagName === 'TEXTAREA') && this.list.indexOf(target) < 0) {
+            this.add(target)
+        }
+    },
+    init: function() {
+        var self = this
+        Array.prototype.forEach.call(document.querySelectorAll('input,textarea'), function(element) {
+            self.find(element)
+        })
+        document.addEventListener('mousedown', function(event) {
+            self.find(event.target)
+        })
+        document.addEventListener('touchend', function(event) {
+            self.find(event.target)
+        })
+        document.addEventListener('touchmove', function(event) {
+            self.find(event.target)
+        })
+        document.addEventListener('keydown', function(event) {
+            var target = event.target
+            var tagName = target.tagName
+            if((tagName === 'INPUT' || tagName === 'TEXTAREA') && self.list.indexOf(target) < 0) {
+                self.onkewdown(event)
+                self.find(event)
+            }
+        })
     }
 }
-function send(index) {
-    var text = show.texts[index]
-    if(!text) {
-        text = show.key
-    }
-    show.key = ''
-    var value = input.value
-    var range = window.getSelection().getRangeAt(0)
-    var index = input.selectionStart + text.length
-    input.value = value.substring(0, input.selectionStart) + text + value.substring(input.selectionEnd)
-    input.setSelectionRange(index, index)
-    input.focus()
-}
-var key = document.getElementById('key')
-var ul = document.getElementById('ul')
-ul.addEventListener('click', function(event) {
-    var target = event.target
-    if(!target.classList.contains('wubi-input-text-li')) {
-        return
-    }
-    var index = target.getAttribute('data-index')
-    send(Number(index))
-})
-var show = {
+
+var inputUI = {
     _key: '',
     _texts: [],
+    // 按键dom
+    keyEl: null,
+    // 文字列表dom
+    ulEl: null,
+    // 获取文字
+    getText: function(text, successCallback, errorCallback) {
+        var xhr = new XMLHttpRequest()
+        xhr.open('GET', 'https://ssssss.link/inputtools/request?text=' + text + '&itc=zh-t-i0-wubi-1986&num=13&cp=0&cs=1&ie=utf-8&oe=utf-8')
+        xhr.onreadystatechange = function() {
+            if(xhr.readyState === 4) {
+                if(xhr.status == 200) {
+                    var res = xhr.responseText
+                    var data
+                    try {
+                        data = JSON.parse(res)
+                    } catch(error) {
+                        console.error('error:', error)
+                        errorCallback && errorCallback(error)
+                    }
+                    console.log(data)
+                    successCallback && successCallback(data)
+                } else {
+                    console.error('error:', xhr.status)
+                    errorCallback && errorCallback(xhr)
+                }
+            }
+        }
+        xhr.send(null)
+    },
+    send: function(index) {
+        var text = inputUI.texts[index]
+        if(!text) {
+            text = inputUI.key
+        }
+        inputUI.key = ''
+        var input = document.activeElement
+        var value = input.value
+        var range = window.getSelection().getRangeAt(0)
+        var index = input.selectionStart + text.length
+        input.value = value.substring(0, input.selectionStart) + text + value.substring(input.selectionEnd)
+        input.setSelectionRange(index, index)
+        input.focus()
+    },
     set key(data) {
         var self = this
         this._key = data
-        key.innerText = data
+        this.keyEl.innerText = data
         if(data) {
-            getText(data, function(text) {
+            this.getText(data, function(text) {
                 if(self.key === data && text && text[1] && text[1][0]) {
                     self.texts = text[1][0][1]
                 }
@@ -127,17 +177,68 @@ var show = {
         if(!Array.isArray(texts)) {
             return
         }
+        var self = this
         this._texts = texts
-        ul.innerHTML = ''
-        texts.forEach((element, index) => {
-            var li = document.createElement('div')
+        this.ulEl.innerHTML = ''
+        texts.forEach(function(element, index) {
+            var li = document.createElement('wubi-input-element')
             li.classList.add('wubi-input-text-li')
             li.setAttribute('data-index', index)
+            if(index === 0) {
+                li.classList.add('text-li-active')
+            }
+            if(index < 10) {
+                element = index + 1 + '. ' + element
+            }
             li.innerText = element
-            ul.appendChild(li)
+            self.ulEl.appendChild(li)
         })
     },
     get texts() {
         return this._texts
+    },
+    addTapListener: function(el, callback) {
+
+    },
+    init: function() {
+        var self = this
+        var box = document.createElement('wubi-input-element')
+        box.classList.add('wubi-input-box')
+        var keyEl = this.keyEl = document.createElement('wubi-input-element')
+        this.keyEl.classList.add('wubi-input-key')
+        var ulEl = this.ulEl = document.createElement('wubi-input-element')
+        ulEl.classList.add('wubi-input-text-ul')
+        var touchmove
+        ulEl.addEventListener('touchstart', function() {
+            event.stopPropagation()
+            touchmove = false
+        })
+        ulEl.addEventListener('touchmove', function() {
+            event.stopPropagation()
+            touchmove = true
+        })
+        ulEl.addEventListener('touchend', function(event) {
+            event.stopPropagation()
+            var target = event.target
+            if(!touchmove) {
+                event.preventDefault()
+                if(!target.classList.contains('wubi-input-text-li')) {
+                    return
+                }
+                var index = target.getAttribute('data-index')
+                self.send(Number(index))
+            }
+        })
+        box.appendChild(keyEl)
+        box.appendChild(ulEl)
+        document.body.appendChild(box)
+        var style = document.createElement('style')
+        style.innerText = 'wubi-input-element{display:block}.wubi-input-box{position:fixed;width:100%;bottom:0;left:0;box-sizing:border-box;padding:0;margin:0;font-size:16px;color:#ffffff;background-color:#282828;z-index:999999999999;text-align:left}.wubi-input-box *{padding:0;margin:0}.wubi-input-box>.wubi-input-key{width:100%;font-size:16px;line-height:20px;padding:0 5px;white-space:nowrap;background-color:#333333}.wubi-input-box>.wubi-input-text-ul{white-space:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}.wubi-input-box>.wubi-input-text-ul::-webkit-scrollbar{display:none}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li{display:inline-block;color:#ffffff;font-size:20px;line-height:48px;padding:0 10px}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li.text-li-active{color:#b6d0a9}'
+        document.head.appendChild(style)
     }
 }
+
+ready(function() {
+    inputUI.init()
+    inputs.init()
+})

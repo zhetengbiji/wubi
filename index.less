@@ -1,3 +1,7 @@
+wubi-input-element {
+    display: block;
+}
+
 .wubi-input-box {
     position: fixed;
     width: 100%;
@@ -9,6 +13,8 @@
     font-size: 16px;
     color: #ffffff;
     background-color: #282828;
+    z-index: 999999999999;
+    text-align: left;
     * {
         padding: 0;
         margin: 0;
@@ -34,7 +40,7 @@
             font-size: 20px;
             line-height: 48px;
             padding: 0 10px;
-            &.active {
+            &.text-li-active {
                 color: #b6d0a9;
             }
         }

@@ -118,7 +118,7 @@ var inputUI = {
     // 文字列表dom
     ulEl: null,
     // 获取文字
-    getText: function(text, successCallback, errorCallback) {
+    getTextByGoogle: function(text, successCallback, errorCallback) {
         var xhr = new XMLHttpRequest()
         xhr.open('GET', 'https://ssssss.link/inputtools/request?text=' + text + '&itc=zh-t-i0-wubi-1986&num=13&cp=0&cs=1&ie=utf-8&oe=utf-8')
         xhr.onreadystatechange = function() {
@@ -133,7 +133,9 @@ var inputUI = {
                         errorCallback && errorCallback(error)
                     }
                     console.log(data)
-                    successCallback && successCallback(data)
+                    if(data && data[1] && data[1][0]) {
+                        successCallback && successCallback(data[1][0][1])
+                    }
                 } else {
                     console.error('error:', xhr.status)
                     errorCallback && errorCallback(xhr)
@@ -141,6 +143,37 @@ var inputUI = {
             }
         }
         xhr.send(null)
+    },
+    getText: function(text, successCallback, errorCallback) {
+        var js = document.createElement('script')
+        var callbackName = '__callback' + Date.now()
+        var timeout = 10000
+        var timing
+        function end() {
+            clearTimeout(timing)
+            delete window[callbackName]
+            js.remove()
+        }
+        window[callbackName] = function(res) {
+            if(typeof successCallback === 'function' && res && res.data) {
+                successCallback(res.data)
+            }
+            end()
+        }
+        js.onerror = function() {
+            if(typeof errorCallback === 'function') {
+                errorCallback()
+            }
+            end()
+        }
+        timing = setTimeout(function() {
+            if(typeof errorCallback === 'function') {
+                errorCallback()
+            }
+            end()
+        }, timeout)
+        js.src = 'https://i-weather.cn/api/?key=wubi&callback=' + callbackName + '&text=' + text
+        document.body.appendChild(js)
     },
     send: function(index) {
         var text = inputUI.texts[index]
@@ -161,9 +194,9 @@ var inputUI = {
         this._key = data
         this.keyEl.innerText = data
         if(data) {
-            this.getText(data, function(text) {
-                if(self.key === data && text && text[1] && text[1][0]) {
-                    self.texts = text[1][0][1]
+            this.getText(data, function(texts) {
+                if(self.key === data) {
+                    self.texts = texts
                 }
             })
         } else {
@@ -187,7 +220,7 @@ var inputUI = {
             if(index === 0) {
                 li.classList.add('text-li-active')
             }
-            if(index < 10) {
+            if(index < 9) {
                 element = index + 1 + '. ' + element
             }
             li.innerText = element

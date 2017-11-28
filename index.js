@@ -87,7 +87,7 @@
                 event.preventDefault()
             }
         },
-        isInput(target) {
+        isInput: function(target) {
             var tagName = target.tagName
             var type = target.getAttribute('type')
             return ((tagName === 'INPUT' && (!type || type === 'search' || type === 'text')) || tagName === 'TEXTAREA')

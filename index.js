@@ -39,7 +39,7 @@
             var preventDefault = true
             var keyCode = event.keyCode
             var key = inputUI.key
-            if(keyCode in KEYCODE) {
+            if(keyCode in KEYCODE && !event.shiftKey) {
                 inputUI.key += KEYCODE[keyCode]
             } else {
                 if(inputUI.key) {
@@ -124,6 +124,8 @@
     var inputUI = {
         _key: '',
         _texts: [],
+        // 输入法UI
+        boxEl: null,
         // 按键dom
         keyEl: null,
         // 文字列表dom
@@ -207,12 +209,14 @@
             this._key = data
             this.keyEl.innerText = data
             if(data) {
+                this.boxEl.classList.add('active')
                 this.getText(data, function(texts) {
                     if(self.key === data) {
                         self.texts = texts
                     }
                 })
             } else {
+                this.boxEl.classList.remove('active')
                 this.texts = []
             }
         },
@@ -248,7 +252,7 @@
         },
         init: function() {
             var self = this
-            var box = document.createElement('wubi-input-element')
+            var box = this.boxEl = document.createElement('wubi-input-element')
             box.classList.add('wubi-input-box')
             var keyEl = this.keyEl = document.createElement('wubi-input-element')
             this.keyEl.classList.add('wubi-input-key')
@@ -279,7 +283,7 @@
             box.appendChild(ulEl)
             document.body.appendChild(box)
             var style = document.createElement('style')
-            style.innerText = 'wubi-input-element{display:block}.wubi-input-box{position:fixed;width:100%;bottom:0;left:0;box-sizing:border-box;padding:0;margin:0;font-size:16px;color:#ffffff;background-color:#282828;z-index:999999999999;text-align:left}.wubi-input-box *{padding:0;margin:0}.wubi-input-box>.wubi-input-key{width:100%;font-size:16px;line-height:20px;padding:0 5px;white-space:nowrap;background-color:#333333}.wubi-input-box>.wubi-input-text-ul{white-space:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}.wubi-input-box>.wubi-input-text-ul::-webkit-scrollbar{display:none}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li{display:inline-block;color:#ffffff;font-size:20px;line-height:48px;padding:0 10px}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li.text-li-active{color:#b6d0a9}'
+            style.innerText = 'wubi-input-element{display:block}.wubi-input-box{position:fixed;display:none;width:100%;bottom:0;left:0;box-sizing:border-box;padding:0;margin:0;font-size:16px;color:#ffffff;background-color:#282828;z-index:999999999999;text-align:left}.wubi-input-box.active{display:block}.wubi-input-box *{padding:0;margin:0}.wubi-input-box>.wubi-input-key{width:100%;height:20px;font-size:16px;line-height:20px;padding:0 5px;white-space:nowrap;background-color:#333333}.wubi-input-box>.wubi-input-text-ul{height:48px;line-height:48px;white-space:nowrap;overflow:auto;-webkit-overflow-scrolling:touch}.wubi-input-box>.wubi-input-text-ul::-webkit-scrollbar{display:none}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li{display:inline-block;color:#ffffff;font-size:20px;padding:0 10px}.wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li.text-li-active{color:#b6d0a9}'
             document.head.appendChild(style)
         }
     }

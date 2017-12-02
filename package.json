@@ -1,0 +1,29 @@
+{
+  "name": "wubi",
+  "version": "1.0.0",
+  "description": "wubi",
+  "main": "out/index.js",
+  "scripts": {
+    "build": "node build/build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhetengbiji/wubi.git"
+  },
+  "keywords": [
+    "wubi"
+  ],
+  "author": "guoshengqiang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhetengbiji/wubi/issues"
+  },
+  "homepage": "https://github.com/zhetengbiji/wubi#readme",
+  "devDependencies": {
+    "css-loader": "^0.28.7",
+    "less": "^2.7.3",
+    "less-loader": "^4.0.5",
+    "style-loader": "^0.19.0",
+    "webpack": "^3.9.1"
+  }
+}

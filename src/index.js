@@ -40,7 +40,7 @@ var inputs = {
         var preventDefault = true
         var keyCode = event.keyCode
         var key = inputUI.key
-        if(keyCode in KEYCODE && !event.shiftKey) {
+        if(keyCode in KEYCODE && !event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey) {
             inputUI.key += KEYCODE[keyCode]
         } else {
             if(inputUI.key) {

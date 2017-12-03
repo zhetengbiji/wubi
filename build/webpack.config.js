@@ -1,5 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
+
 module.exports = {
     entry: path.join(__dirname, '../src/index.js'),
     output: {
@@ -9,8 +10,20 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.less$/,
-                loader: 'style-loader!css-loader!less-loader'
+                test: /\.html$/,
+                loader: 'html-loader'
+            },
+            {
+                test: /\.js$/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: [
+                            "es2015"
+                        ]
+                    }
+                },
+                exclude: /node_modules/
             }
         ]
     },

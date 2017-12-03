@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>wubi</title>
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+            }
+
+            .wubi-input-box {
+                position: relative;
+                width: 100%;
+                font-size: 16px;
+                color: #ffffff;
+                background-color: #282828;
+            }
+
+            .wubi-input-box>.wubi-input-key {
+                width: 100%;
+                height: 20px;
+                font-size: 16px;
+                line-height: 20px;
+                padding: 0 5px;
+                white-space: nowrap;
+                background-color: #333333;
+            }
+
+            .wubi-input-box>.wubi-input-text-ul {
+                height: 48px;
+                line-height: 48px;
+                white-space: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .wubi-input-box>.wubi-input-text-ul::-webkit-scrollbar {
+                display: none;
+            }
+
+            .wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li {
+                display: inline-block;
+                color: #ffffff;
+                font-size: 20px;
+                padding: 0 10px;
+            }
+
+            .wubi-input-box>.wubi-input-text-ul>.wubi-input-text-li.text-li-active {
+                color: #b6d0a9;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="wubi-input-box">
+            <div id="key" class="wubi-input-key"></div>
+            <div id="ul" class="wubi-input-text-ul">
+            </div>
+        </div>
+        <script>
+            var keyEl = document.getElementById('key')
+            var ulEl = document.getElementById('ul')
+            var touchmove
+            ulEl.addEventListener('touchstart', function() {
+                event.stopPropagation()
+                touchmove = false
+            })
+            ulEl.addEventListener('touchmove', function() {
+                event.stopPropagation()
+                touchmove = true
+            })
+            ulEl.addEventListener('touchend', function(event) {
+                event.stopPropagation()
+                var target = event.target
+                if(!touchmove) {
+                    event.preventDefault()
+                    if(!target.classList.contains('wubi-input-text-li')) {
+                        return
+                    }
+                    var index = target.getAttribute('data-index')
+                    currentIframe.emit('select', Number(index))
+                }
+            })
+            function onKey(key) {
+                keyEl.innerHTML = key
+            }
+            function onTexts(texts) {
+                if(!Array.isArray(texts)) {
+                    return
+                }
+                var self = this
+                ulEl.innerHTML = ''
+                texts.forEach(function(element, index) {
+                    var li = document.createElement('wubi-input-element')
+                    li.classList.add('wubi-input-text-li')
+                    li.setAttribute('data-index', index)
+                    if(index === 0) {
+                        li.classList.add('text-li-active')
+                    }
+                    if(index < 9) {
+                        element = index + 1 + '. ' + element
+                    }
+                    li.innerText = element
+                    ulEl.appendChild(li)
+                })
+            }
+        </script>
+    </body>
+
+</html>

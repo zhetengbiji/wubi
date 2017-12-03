@@ -1,4 +1,4 @@
-require('./index.less')
+var Iframe = require('./Iframe')
 
 function ready(callback) {
     function completed() {
@@ -99,24 +99,23 @@ var inputs = {
         }
     },
     init: function() {
-        var self = this
-        Array.prototype.forEach.call(document.querySelectorAll('input,textarea'), function(element) {
-            self.find(element)
+        Array.prototype.forEach.call(document.querySelectorAll('input,textarea'), (element) => {
+            this.find(element)
         })
-        document.addEventListener('mousedown', function(event) {
-            self.find(event.target)
+        document.addEventListener('mousedown', (event) => {
+            this.find(event.target)
         })
-        document.addEventListener('touchend', function(event) {
-            self.find(event.target)
+        document.addEventListener('touchend', (event) => {
+            this.find(event.target)
         })
-        document.addEventListener('touchmove', function(event) {
-            self.find(event.target)
+        document.addEventListener('touchmove', (event) => {
+            this.find(event.target)
         })
-        document.addEventListener('keydown', function(event) {
+        document.addEventListener('keydown', (event) => {
             var target = event.target
-            if(self.isInput(target) && self.list.indexOf(target) < 0) {
-                self.onkewdown(event)
-                self.find(event)
+            if(this.isInput(target) && this.list.indexOf(target) < 0) {
+                this.onkewdown(event)
+                this.find(event)
             }
         })
     }
@@ -125,12 +124,7 @@ var inputs = {
 var inputUI = {
     _key: '',
     _texts: [],
-    // 输入法UI
-    boxEl: null,
-    // 按键dom
-    keyEl: null,
-    // 文字列表dom
-    ulEl: null,
+    iframe: null,
     // 获取文字
     getTextByGoogle: function(text, successCallback, errorCallback) {
         var xhr = new XMLHttpRequest()
@@ -189,11 +183,11 @@ var inputUI = {
         document.body.appendChild(js)
     },
     send: function(index) {
-        var text = inputUI.texts[index]
+        var text = this.texts[index]
         if(!text) {
-            text = inputUI.key
+            text = this.key
         }
-        inputUI.key = ''
+        this.key = ''
         var input = document.activeElement
         var value = input.value
         var range = window.getSelection().getRangeAt(0)
@@ -206,18 +200,17 @@ var inputUI = {
         }))
     },
     set key(data) {
-        var self = this
         this._key = data
-        this.keyEl.innerText = data
+        this.iframe.evalJS(`onKey('${data}')`)
         if(data) {
-            this.boxEl.classList.add('active')
-            this.getText(data, function(texts) {
-                if(self.key === data) {
-                    self.texts = texts
+            this.iframe.show()
+            this.getText(data, (texts) => {
+                if(this.key === data) {
+                    this.texts = texts
                 }
             })
         } else {
-            this.boxEl.classList.remove('active')
+            this.iframe.hide()
             this.texts = []
         }
     },
@@ -228,61 +221,18 @@ var inputUI = {
         if(!Array.isArray(texts)) {
             return
         }
-        var self = this
         this._texts = texts
-        this.ulEl.innerHTML = ''
-        texts.forEach(function(element, index) {
-            var li = document.createElement('wubi-input-element')
-            li.classList.add('wubi-input-text-li')
-            li.setAttribute('data-index', index)
-            if(index === 0) {
-                li.classList.add('text-li-active')
-            }
-            if(index < 9) {
-                element = index + 1 + '. ' + element
-            }
-            li.innerText = element
-            self.ulEl.appendChild(li)
-        })
+        this.iframe.evalJS(`onTexts(${JSON.stringify(texts)})`)
     },
     get texts() {
         return this._texts
     },
-    addTapListener: function(el, callback) {
-
-    },
     init: function() {
-        var self = this
-        var box = this.boxEl = document.createElement('wubi-input-element')
-        box.classList.add('wubi-input-box')
-        var keyEl = this.keyEl = document.createElement('wubi-input-element')
-        this.keyEl.classList.add('wubi-input-key')
-        var ulEl = this.ulEl = document.createElement('wubi-input-element')
-        ulEl.classList.add('wubi-input-text-ul')
-        var touchmove
-        ulEl.addEventListener('touchstart', function() {
-            event.stopPropagation()
-            touchmove = false
+        var iframe = this.iframe = new Iframe()
+        iframe.loadData(require('./ui.html'))
+        iframe.on('select', event => {
+            this.send(event.detail)
         })
-        ulEl.addEventListener('touchmove', function() {
-            event.stopPropagation()
-            touchmove = true
-        })
-        ulEl.addEventListener('touchend', function(event) {
-            event.stopPropagation()
-            var target = event.target
-            if(!touchmove) {
-                event.preventDefault()
-                if(!target.classList.contains('wubi-input-text-li')) {
-                    return
-                }
-                var index = target.getAttribute('data-index')
-                self.send(Number(index))
-            }
-        })
-        box.appendChild(keyEl)
-        box.appendChild(ulEl)
-        document.body.appendChild(box)
     }
 }
 
